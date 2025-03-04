@@ -21,7 +21,7 @@
 # RStudio files
 .Rproj.user/
 
-# produced vignettes
+# Produced vignettes
 vignettes/*.html
 vignettes/*.pdf
 
@@ -30,7 +30,7 @@ vignettes/*.pdf
 
 # knitr and R markdown default cache directories
 *_cache/
-/cache/
+cache/
 
 # Temporary files created by R markdown
 *.utf8.md
@@ -39,11 +39,21 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-# pkgdown site
+# pkgdown site (GitHub Pages)
 docs/
+!docs/index.html  # Allow GitHub Pages entry
 
-# translation temp files
+# Translation temp files
 po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Machine Learning project-specific ignores
+final_predictions.csv  # Output predictions
+pml-training.csv       # Raw dataset
+pml-testing.csv        # Raw dataset
+
+# Ignore all HTML files except the report
+*.html
+!report.html  # Keep the final report
