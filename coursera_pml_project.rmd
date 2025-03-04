@@ -1,0 +1,89 @@
+---
+title: "Coursera PML Project"
+author: "Ramandha Putra S"
+date: "3/4/2025"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(caret)
+library(randomForest)
+library(gbm)
+library(dplyr)
+library(ggplot2)
+```
+
+# Introduction
+
+This project aims to predict the manner in which individuals perform barbell lifts using accelerometer data. The target variable is `classe`, which represents different exercise types.
+
+# Data Preprocessing
+
+```{r load-data}
+# Load Data
+train_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+test_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+train_data <- read.csv(train_url, na.strings = c("NA", "", "#DIV/0!"))
+test_data <- read.csv(test_url, na.strings = c("NA", "", "#DIV/0!"))
+
+# Remove Metadata Columns (First 5 columns)
+train_data <- train_data[, -(1:5)]
+test_data <- test_data[, -(1:5)]
+
+# Remove Columns with Too Many NAs
+threshold <- 0.5 * nrow(train_data)
+valid_cols <- colSums(is.na(train_data)) < threshold
+train_data <- train_data[, valid_cols]
+test_data <- test_data[, valid_cols]
+```
+
+# Train-Test Split
+
+```{r split-data}
+set.seed(123)
+inTrain <- createDataPartition(train_data$classe, p = 0.75, list = FALSE)
+training <- train_data[inTrain, ]
+testing <- train_data[-inTrain, ]
+
+# Ensure Target Variable is a Factor
+training$classe <- as.factor(training$classe)
+testing$classe <- as.factor(testing$classe)
+```
+
+# Model Training
+
+```{r train-models}
+set.seed(123)
+ctrl <- trainControl(method = "cv", number = 5)
+
+# Random Forest Model
+rf_model <- train(classe ~ ., data = training, method = "rf", trControl = ctrl)
+
+# Gradient Boosting Model
+gbm_model <- train(classe ~ ., data = training, method = "gbm", trControl = ctrl, verbose = FALSE)
+```
+
+# Model Evaluation
+
+```{r evaluate-models}
+pred_rf <- predict(rf_model, testing)
+pred_gbm <- predict(gbm_model, testing)
+
+conf_rf <- confusionMatrix(pred_rf, testing$classe)
+conf_gbm <- confusionMatrix(pred_gbm, testing$classe)
+
+print(conf_rf)
+print(conf_gbm)
+```
+
+# Prediction on Test Data
+
+```{r predict-test-data}
+predictions <- predict(rf_model, test_data)
+write.csv(predictions, "final_predictions.csv", row.names = FALSE)
+```
+
+# Conclusion
+
+The Random Forest model achieved high accuracy, making it a suitable choice for predicting exercise classification. The model will be used to predict the test dataset for final submission.
